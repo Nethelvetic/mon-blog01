@@ -1,18 +1,21 @@
 "use client";
 
+import { useState } from "react";
+
 export default function ContactPage() {
+    const [alertMessage, setAlertMessage] = useState(null);
+    const [alertType, setAlertType] = useState(""); // success ou error
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Collecte des données du formulaire
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
-        console.log("Données envoyées :", data);
 
-
-        // Appel à Make pour transmettre les données
         try {
-            const response = await fetch("https://hook.eu1.make.com/e19q1xysudcchty2f6egoefglos7yzae", {
+            // Appel à l'API Next.js pour envoyer les données
+            const response = await fetch("/api/contact", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -20,15 +23,20 @@ export default function ContactPage() {
                 body: JSON.stringify(data),
             });
 
+            // Vérification de la réponse
             if (response.ok) {
-                alert("Votre message a été envoyé avec succès !");
+                const result = await response.json(); // Lire la réponse JSON de l'API
+                setAlertMessage(result.message); // Définir le message reçu
+                setAlertType("success"); // Définir le type à success
                 e.target.reset(); // Réinitialiser le formulaire
             } else {
-                alert("Une erreur est survenue. Veuillez réessayer.");
+                setAlertMessage("Une erreur est survenue. Veuillez réessayer.");
+                setAlertType("error"); // Définir le type à error
             }
         } catch (error) {
             console.error("Erreur lors de l'envoi des données :", error);
-            alert("Une erreur est survenue. Veuillez réessayer.");
+            setAlertMessage("Une erreur est survenue. Veuillez réessayer.");
+            setAlertType("error"); // Définir le type à error
         }
     };
 
@@ -39,6 +47,19 @@ export default function ContactPage() {
                 className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full"
             >
                 <h1 className="text-2xl font-bold mb-4 text-gray-800">Contactez-nous</h1>
+
+                {alertMessage && (
+                    <div
+                        className={`mb-4 p-4 rounded ${
+                            alertType === "success"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                        }`}
+                    >
+                        {alertMessage}
+                    </div>
+                )}
+
                 <div className="mb-4">
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                         Nom
