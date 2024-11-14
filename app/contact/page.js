@@ -14,8 +14,8 @@ export default function ContactPage() {
         const data = Object.fromEntries(formData);
 
         try {
-            // Appel à l'API Next.js pour envoyer les données
-            const response = await fetch("/api/contact", {
+            // Appel au webhook Make
+            const response = await fetch("https://hook.eu1.make.com/e19q1xysudcchty2f6egoefglos7yzae", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -24,19 +24,19 @@ export default function ContactPage() {
             });
 
             // Vérification de la réponse
+            const result = await response.json(); // Lire la réponse JSON
             if (response.ok) {
-                const result = await response.json(); // Lire la réponse JSON de l'API
-                setAlertMessage(result.message); // Définir le message reçu
-                setAlertType("success"); // Définir le type à success
+                setAlertMessage(result.message || "Formulaire envoyé avec succès !");
+                setAlertType("success");
                 e.target.reset(); // Réinitialiser le formulaire
             } else {
-                setAlertMessage("Une erreur est survenue. Veuillez réessayer.");
-                setAlertType("error"); // Définir le type à error
+                setAlertMessage(result.message || "Une erreur est survenue. Veuillez réessayer.");
+                setAlertType("error");
             }
         } catch (error) {
             console.error("Erreur lors de l'envoi des données :", error);
             setAlertMessage("Une erreur est survenue. Veuillez réessayer.");
-            setAlertType("error"); // Définir le type à error
+            setAlertType("error");
         }
     };
 
