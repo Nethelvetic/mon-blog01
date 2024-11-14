@@ -13,8 +13,12 @@ export default function ContactPage() {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
+        // Log des données collectées
+        console.log("Données du formulaire collectées :", data);
+
         try {
             // Appel au webhook Make
+            console.log("Envoi des données au webhook Make...");
             const response = await fetch("https://hook.eu1.make.com/e19q1xysudcchty2f6egoefglos7yzae", {
                 method: "POST",
                 headers: {
@@ -24,13 +28,25 @@ export default function ContactPage() {
             });
 
             // Vérification de la réponse
-            const result = await response.json(); // Lire la réponse JSON
+            console.log("Réponse reçue du webhook :", response);
+
+            // Essayer de lire la réponse JSON
+            let result;
+            try {
+                result = await response.json();
+                console.log("Données JSON de la réponse :", result);
+            } catch (jsonError) {
+                console.error("Erreur lors de la lecture du JSON :", jsonError);
+            }
+
             if (response.ok) {
-                setAlertMessage(result.message || "Formulaire envoyé avec succès !");
+                console.log("Webhook a répondu avec succès.");
+                setAlertMessage(result?.message || "Formulaire envoyé avec succès !");
                 setAlertType("success");
                 e.target.reset(); // Réinitialiser le formulaire
             } else {
-                setAlertMessage(result.message || "Une erreur est survenue. Veuillez réessayer.");
+                console.error("Erreur HTTP reçue :", response.status, response.statusText);
+                setAlertMessage(result?.message || "Une erreur est survenue. Veuillez réessayer.");
                 setAlertType("error");
             }
         } catch (error) {
